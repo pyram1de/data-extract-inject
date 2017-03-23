@@ -1,4 +1,4 @@
-var sourceFolder = 'E:\\temp\\fullExtract\\';
+var sourceFolder = 'E:\\temp\\joiner_extracts\\';
 var targetFolder = 'E:\\temp\\processedExtract\\';
 var logPath = 'E:\\temp\\processedExtract\\logpath.log';
 var fs = require('fs');
@@ -24,7 +24,7 @@ var checkValidFileType = function(filename){
             if(validFileType.regx.test(filename)){
                 returnType = validFileType;
                 throw breakException;
-            } 
+            }
         });
     } catch (e) {
         if (e!== breakException) {
@@ -74,13 +74,15 @@ run(function* generatorF(resume){
             }, resume);
             var prevData = {
                 Surname : rowData[4],
-                DOB: rowData[7]
+                DOB: rowData[7],
+                "First name": rowData[5]
             };
             var status;
             if(data&&data.length>0){
                 status = 'matched on nino';
                 rowData[4] = data[0].Surname;
                 rowData[7] = data[0].DOB;
+                rowData[5] = data[0]["First name"];
             } else {
                 //data = yield lookupData.findOne({
                 //    "Surname": rowData[4],
@@ -94,7 +96,8 @@ run(function* generatorF(resume){
                     status = 'not found';
                     data = [{
                         Surname : 'not found',
-                        DOB: 'not found'
+                        DOB: 'not found',
+                        "First name": 'not found'
                     }];
                 //}
             }
@@ -106,12 +109,15 @@ run(function* generatorF(resume){
                 (inx + 2) + tab +
                 status + tab + 
                 rowData[6] + tab + 
+                prevData["First name"] + tab + 
+                data[0]["First name"] + tab +
+                (status !== 'not found' && (prevData["First name"]!==data[0]["First name"]) ? 'Changed' : '') + tab +
                 prevData.Surname + tab + 
                 data[0].Surname + tab +
-                (status !== 'not found' && (prevData.Surname!==data.Surname) ? 'Changed' : '') + tab +
+                (status !== 'not found' && (prevData.Surname!==data[0].Surname) ? 'Changed' : '') + tab +
                 prevData.DOB + tab +
                 data[0].DOB + tab +
-                (status !== 'not found' && (prevData.DOB!==data.DOB) ? 'Changed' : '') + newLine
+                (status !== 'not found' && (prevData.DOB!==data[0].DOB) ? 'Changed' : '') + newLine
                 );
             fs.appendFileSync(targetFolder+filename,output+newLine);
         }
